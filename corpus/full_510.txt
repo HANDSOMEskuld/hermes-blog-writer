@@ -1,0 +1,114 @@
+[8.9更新] 免费“白嫖”ChatGPT无限API调用！网页变APIKEY，chatgpt2api|2026-07-30|
+chatgpt2api 项目将 ChatGPT 网页版服务封装为兼容 OpenAI 标准的 API 接口，支持 Docker、一键安装等部署方式，并介绍了配置、账号管理和代理设置流程。
+文章介绍了文本、搜索、图片等接口调用方法，以及通过已有账号或注册账号获取 API 使用能力的操作步骤。
+API的必要性
+在 AI 时代，对于 API 的需求是非常广泛且必要的。虽然现在有很多大模型（比如 ChatGPT）支持网页版试用，但在进行项目开发或使用时，都需要填写自定义的 API key。
+就算你订阅了 ChatGPT 的 Plus 会员，这个 API key 只有付费才可以进行使用。调用的 API key 也是有限制的。
+那么，有没有一种方法可以将你的 Plus 订阅会员封装成 API key，从而可以进行几乎无限制的使用呢？或者说，用多个账号组成 API key，从而达到免费“白嫖” ChatGPT API key 的目的呢？
+今天给大家分享 ChatGPT to API 这个项目。
+这里提前说一句，这个项目的原开发者现在好像已经不再维护了。因此，我分享的是另外一个项目，它对 ChatGPT to API 进行了开发维护，最近一直在更新。
+使用教程
+这个项目支持多种部署方式：
+一键安装；
+使用 Docker 运行；
+在本地电脑进行本地开发。
+一键安装命令如下：
+curl -fsSL https://raw.githubusercontent.com/yukkcat/chatgpt2api/main/deploy/install.sh | sudo bash
+因为我比较喜欢用 Docker，而且对于其他服务器来说，Docker 也是一种比较方便且全能的搭建方式，所以今天也用 Docker 来进行演示。
+比如我上次给你们分享的免费的二核4G的服务器，就可以安装docker，从而部署这个项目。
+速度！2核8G 云服务器免费开通教程，最新版。
+21天前
+1
+1198
+6
+使用 Docker 的话，你可以在你的服务器上进行部署，也可以在你的电脑上面进行部署。
+此处内容已隐藏，请付费后查看
+然后在浏览器里进行访问就可以打开了，输入你的管理密钥进行登录。
+功能的使用
+8.9号更新：已经没有这个功能了^
+首先，这个项目相比原项目，新增了注册账号的功能，不仅可以使用微软等正规邮箱，也支持临时邮箱。
+具体操作步骤如下：
+进入项目页面后，点击侧边栏的“注册账号”。
+邮箱来源可以选择“临时邮箱”，无需配置任何内容即可进行账号注册。
+此外，还可以配置注册账号的数量，注册成功后会自动保存。
+注册账号或绘图的时候，大概率会被 Cloudflare 拦截，因此你可以使用附带的
+WARP + Privoxy + FlareSolverr
+方案：
+cp .env.example .env
+printf '{ "auth-key": "your_secret_key_here" }\n' > config.json
+docker compose -f docker-compose.warp.yml up -d
+详细说明
+该 compose 会启动：
+warp-proxy
+：提供 WARP SOCKS5 出口。
+privoxy
+：把 WARP SOCKS5 转成 HTTP 代理。
+flaresolverr
+：刷新 Cloudflare clearance。
+init-config
+：幂等写入
+proxy_runtime
+默认配置。
+app
+：启动 ChatGPT2API 主服务。
+默认只让上游 OpenAI / ChatGPT 请求走稳定代理，账号邮箱、CPA 等辅助链路不会被强制接管。账号自身配置的代理优先级最高，其次是稳定代理运行时，再其次是显式代理和旧版全局代理。
+可在
+.env
+中调整端口和代理运行时参数，也可在后台设置页的「稳定代理运行时」面板手动保存、测试代理和测试 clearance。
+重启之后再次点击注册账号，使用
+tempmail.lol
+的临时邮箱，不需要填写任何参数就可以自动进行账号的注册。
+之后在账号管理列表就可以看到你刚才注册好的账号。
+可以在对话画图窗口进行测试是否可用，经过我的测试，实际是可以用的。
+接下来复制 API key，按照下面的格式进行调用就可以了，它是兼容 OpenAI 标准的。
+接口速览
+接口
+方法
+说明
+/v1/models
+GET
+返回当前模型列表。
+/v1/chat/completions
+POST
+Chat Completions 兼容入口，支持文本、搜索和图片场景。
+/v1/responses
+POST
+Responses 兼容入口，支持文本、搜索和图片工具调用。
+/v1/messages
+POST
+Messages 兼容入口。
+/v1/search
+POST
+ChatGPT 搜索兼容入口。
+/v1/images/generations
+POST
+OpenAI Images 文生图兼容入口。
+/v1/images/edits
+POST
+OpenAI Images 图生图 / 编辑兼容入口。
+/v1/editable-file-tasks
+GET/POST
+PPT / PSD / 可编辑文件任务创建与查询。
+/v1/ppt/generations
+POST
+PPT 生成任务快捷入口。
+/v1/psd/generations
+POST
+PSD 生成任务快捷入口。
+/files/{file_path}
+GET/HEAD
+文件任务产物下载。
+你也可以在账号管理页面点击“导入和添加”，选择
+OAuth
+登录已有账号。打开授权页面，复制
+callback URL
+并粘贴，完成导入。这样就可以登录自己的 OpenAI 账号了。
+你可以将你的 Docker 进行反代，使其绑定一个域名，并开启 HTTPS 访问。这样的话，就可以在你的工具中更好地使用了。
+总结
+用这个方法，不但可以将自己的 OpenAI Plus 会员账号创建成几乎不限量的 API 调用方式，还可以通过创建多个账号来实现文本对话或者图片生成。毕竟 OpenAI 的图片生成效果是很好的。
+你也可以将生成的
+API key
+以及
+base URL
+等信息，接连填写进入任何标准 OpenAI 调用接口的应用或项目中进行使用。
+有任何问题，你也可以在评论区进行留言和讨论。

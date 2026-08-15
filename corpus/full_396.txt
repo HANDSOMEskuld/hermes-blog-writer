@@ -1,0 +1,43 @@
+WP Rocket 免费版，一款加速 WordPress 博客的终极插件，亲测好用。|2026-07-22|
+WP Rocket 插件通过压缩和优化 CSS、JavaScript 以及 HTML 文件，并利用缓存机制来提升 WordPress 网站的加载速度。该插件为付费产品，并未在官方插件目录中注册。
+文章分享了一个可免费下载的 3.21.0 版本，并介绍了其涵盖数据库优化、缓存、图片懒加载及 CDN 等功能的整合能力。用户只需上传下载的压缩包即可完成安装，插件启用后会自动进行加速配置，基本无需手动干预。
+加速WP速度
+加速WordPress访问速度的插件有很多，但是最好用、最出名的肯定是WP Rocket。
+但大家一直因为它是付费的而苦恼。今天给大家分享一个免费版本的 WP Rocket，是 3.21.0 版本，经过实测，免费好用。
+WP Rocket通过压缩和优化 CSS、Javascript、HTML 等，并使用缓存功能来加快网站速度。
+WP Rocket 是一个付费插件，没有免费计划，因此它没有在 WordPress 插件目录中注册，也
+不会出现在插件搜索结果中
+。
+下载使用
+直接点击下方的链接进行下载，下载之后是一个zip的压缩包格式。
+【appstoy.com】wp-rocket3.21.0
+下载
+WP Rocket 功能列表
+数据库优化
+：WP Optimize、WP Sweep
+强大的缓存功能
+：WP Fastest Cache、W3 Total Cache
+CSS/JS 优化
+：自动优化、资源清理
+关键 CSS 生成
+：Autoptimize（付费服务）
+Javascript 延迟
+：异步 Javascript
+图片和视频懒加载
+：a3 Lazy Load、EWWW Image Optimizer、Autoptimize
+WebP 支持
+：ShortPixel、WebP 转换器
+链接预加载/预取
+：手动输入
+字体预加载交换
+：手动输入
+CDN实现
+：CDN插件（Cloudflare、Bunny CDN等）
+心跳控制
+：心跳控制
+Google Analytics localhost
+：Clearfy，CAOS
+在你的 WordPress 后台点击“插件”→“安装插件”，然后将 zip 格式的文件上传到 WordPress 上，就会自动完成安装。
+安装好之后，WP Rocket 会出现在已安装插件的列表中。点击启用 WP Rocket，它会自动设置网站进行加速，几乎不用配置任何东西。
+如果你想的话，也可以点击进入 WP Rocket 的设置页面，对每一项进行自定义设置，还可以对你的网站进行打分优化。
+可以试一试吧，有任何问题可以在评论区留言。
