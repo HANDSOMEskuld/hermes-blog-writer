@@ -1,9 +1,13 @@
 # 运行时产物（不包含在仓库）
-corpus/
-style_guide.md
+corpus/full_*.txt
+corpus/_index.json
+corpus/_iter_plan.json
 _wp_terms.json
 *.env
 config.env
+
+# 示例风格库是样例, 可入库; 但用户自己的 style_guide.md 运行时生成, 不入库
+style_guide.md
 
 # Python
 __pycache__/

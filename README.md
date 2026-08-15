@@ -75,10 +75,22 @@ python3 assets/publish_draft.py <草稿md>
 
 | 脚本 | 作用 | 关键参数 |
 |---|---|---|
-| `crawl_corpus.py` | 抓 WP 文章 | `--site --out --top --by-views` |
-| `iterate_style.py` | 编排风格迭代 | `--corpus --out --top --group --iters [--by-views]` |
+| `blog_writer.py` | 统一 CLI 入口 | `crawl/plan/qa/publish/init` 子命令 |
+| `crawl_corpus.py` | 抓 WP 文章 | `--site --out --limit [--by-views]` |
+| `iterate_style.py` | 风格迭代编排 | `--corpus --out --top --group --iters [--by-views]` |
 | `review_before_publish.py` | 三维质检 | `<草稿md路径>` |
-| `publish_draft.py` | 上传+分类标签 | `<草稿md>`（需 WP_* 环境变量） |
+| `publish_draft.py` | WP 上传+分类标签 | `<草稿md>`（需 WP_* 环境变量） |
+| `publish_local.py` | 本地/Hexo 后端 | `<草稿md> [--format hexo]`（多平台扩展样板） |
+
+### CLI 速查
+```bash
+python3 blog_writer.py crawl   --site https://你的站.com --limit 60
+python3 blog_writer.py plan    --top 20 --group 5 --iters 3 --by-views
+python3 blog_writer.py qa      drafts/xxx.md
+python3 blog_writer.py publish drafts/xxx.md --backend wp      # 需 WP_* 环境变量
+python3 blog_writer.py publish drafts/xxx.md --backend local   # 落盘 ./_out
+python3 blog_writer.py init    --site https://你的站.com      # 抓+计划 一键
+```
 
 ---
 
@@ -97,15 +109,19 @@ python3 assets/publish_draft.py <草稿md>
 hermes-blog-writer/
 ├── SKILL.md                    # Hermes skill：流程编排 + 触发词
 ├── README.md
+├── LICENSE                     # MIT
+├── blog_writer.py              # 统一 CLI 入口(crawl/plan/qa/publish/init)
 ├── assets/
 │   ├── crawl_corpus.py         # 抓语料
 │   ├── iterate_style.py        # 风格迭代编排
 │   ├── review_before_publish.py# 三维质检
-│   ├── publish_draft.py        # 上传+分类标签
+│   ├── publish_draft.py        # WP 上传+分类标签
+│   ├── publish_local.py        # 本地/Hexo 后端样板(可扩展)
 │   ├── style_guide_template.md # 风格库模板
+│   ├── style_guide_example.md  # 已训练 V1.2 浓缩样例(参考)
 │   ├── memory_snippet.md       # 粘进 Hermes 记忆的段落
 │   └── config.example.env      # WP 凭据模板
-└── (运行时生成) corpus/ style_guide.md _wp_terms.json
+└── (运行时生成) corpus/ style_guide.md _wp_terms.json _out/
 ```
 
 ## License

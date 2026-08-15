@@ -1,0 +1,2 @@
+# 运行时语料目录。运行 crawl_corpus.py 后此处会出现 full_*.txt 与 _index.json。
+# 本文件仅作占位，确保 clone 后目录存在；实际语料不入库。

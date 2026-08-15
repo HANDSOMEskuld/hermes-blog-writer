@@ -11,17 +11,22 @@ description: 博客写作全流程助手——从抓取站点文章、迭代提�
 - 用户说「用我的风格写篇XXX」「写博客」「把这篇发到 WP」「分析我的写作风格」
 - 或显式调用 `/blog-write`
 
-## 项目资产（本 skill 的 assets/ 目录）
-- `crawl_corpus.py`   抓取任意 WP 站点文章为语料
-- `iterate_style.py`  编排「标杆文迭代」生成 style_guide.md 风格库
-- `review_before_publish.py`  三维质检(情感弧线/句子节奏/情绪词密度)
-- `publish_draft.py`  上传 WP 草稿 + AI 分析分类标签
-- `style_guide_template.md`  风格库空模板
-- `config.example.env`  WP 凭据模板
+## 项目资产（本 skill 的 assets/ 目录 + 根目录入口）
+- `blog_writer.py`    根目录统一 CLI 入口: `crawl/plan/qa/publish/init` 子命令
+- `assets/crawl_corpus.py`   抓取任意 WP 站点文章为语料
+- `assets/iterate_style.py`  编排「标杆文迭代」生成 style_guide.md 风格库
+- `assets/review_before_publish.py`  三维质检(情感弧线/句子节奏/情绪词密度)
+- `assets/publish_draft.py`  上传 WP 草稿 + AI 分析分类标签
+- `assets/publish_local.py`  本地/Hexo 后端样板(可扩展对接其他平台)
+- `assets/style_guide_template.md`  风格库空模板
+- `assets/style_guide_example.md`   已训练 V1.2 浓缩样例(参考)
+- `assets/config.example.env`  WP 凭据模板
+- `LICENSE`  MIT
 
 ## 资产路径解析
 本 SKILL.md 所在目录即 `SKILL_DIR`。脚本在 `SKILL_DIR/assets/`。调用脚本用：
 `python3 <SKILL_DIR>/assets/<script>.py ...`
+统一入口：`python3 <SKILL_DIR>/blog_writer.py <子命令>`
 
 ## 完整流程（按需调用，不必全跑）
 
@@ -44,13 +49,17 @@ description: 博客写作全流程助手——从抓取站点文章、迭代提�
    - **数据标来源**、**承上启下过渡**、**实操步骤可验证不造假**
 4. 定稿后跑质检：`python3 <SKILL_DIR>/assets/review_before_publish.py <草稿md>`，据 ⚠ 微调，重跑至达标。
 
-### 阶段 C：上传 WP 草稿（发布前最后一步）
+### 阶段 C：上传草稿（发布前最后一步）
 1. 确认已跑过阶段 B 的质检。
-2. 设环境变量（凭据**只从环境变量读，绝不写文件/记忆**）：
-   `export WP_USER=<用户> WP_APP_PASS='<应用密码>' WP_SITE='<站>'`
-3. 上传：`python3 <SKILL_DIR>/assets/publish_draft.py <草稿md>`
+2. **WP 后端**（默认）：
+   - 设环境变量（凭据**只从环境变量读，绝不写文件/记忆**）：
+     `export WP_USER=<用户> WP_APP_PASS='<应用密码>' WP_SITE='<站>'`
+   - 上传：`python3 <SKILL_DIR>/assets/publish_draft.py <草稿md>`
    - 脚本自动 AI 分析分类/标签并填入，仅建 `draft` 不发布。
-4. 把后台编辑链接发给用户，提醒「人工审核后发布」。
+3. **本地/静态站后端**（可扩展）：
+   - `python3 <SKILL_DIR>/assets/publish_local.py <草稿md> [--format hexo]`
+   - 转 HTML(+YAML front-matter) 落盘 `./_out/`，作为对接 Hexo/Typecho 等样板。
+4. 把后台编辑链接/本地文件路径发给用户，提醒「人工审核后发布」。
 
 ## 自然语言兼容
 即使使用者不敲 `/blog-write`，只要说「用我的风格写…」「发到我的 WordPress」「检查下这篇文章的情绪节奏」，都应自动套用上述流程。
