@@ -135,14 +135,21 @@ def md_to_html(md):
         # WP 短代码(如 [postsbox]) 原样保留, 不包 <p>, 避免古腾堡解析异常
         if re.match(r'^\[[a-z]+', s):
             html.append(s); continue
-        # 行内 Markdown -> HTML: **加粗** -> <strong>, *斜体* -> <em>
-        # 注意: 必须在 &lt; 转义之前做, 否则 <strong> 会被转义成 &lt;strong> 导致加粗失效
+        # 行内 Markdown -> HTML (顺序: 先转链接/加粗/斜体, 再转义用户输入的裸 < &)
+        # 1) 链接 [text](url) -> <a href="url">text</a>
+        def link_repl(m):
+            text, url = m.group(1), m.group(2)
+            return f'<a href="{url}">{text}</a>'
+        s = re.sub(r'\[([^\]]+)\]\((https?://[^)\s]+)\)', link_repl, s)
+        # 2) 加粗 **x** -> <strong>x</strong>
         s = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
+        # 3) 斜体 *x* -> <em>x</em>
         s = re.sub(r'(?<!\*)\*(?!\*)(.+?)\*(?!\*)', r'<em>\1</em>', s)
-        # 转义用户文本里的裸 < & (已生成的标签不受影响, 因 <strong>/<em> 非裸)
-        s = s.replace('&','&amp;')
-        # 仅转义不在已知标签内的 <
-        s = re.sub(r'<(?!strong>|/strong>|em>|/em>|/p>|p>|h[1-6]>|/h[1-6]>|pre>|/pre>|code>|/code>)', '&lt;', s)
+        # 3.5) 行内代码 `x` -> <code>x</code> (需在转义前, 避免内部 < & 被误转)
+        s = re.sub(r'`([^`]+)`', r'<code>\1</code>', s)
+        # 4) 转义用户文本中残留的裸 < & (已生成的标签 <a>/<strong>/<em>/<code>/<h>/<p> 不受影响)
+        s = re.sub(r'&(?!amp;|lt;|gt;|quot;|#\d+;)', '&amp;', s)
+        s = re.sub(r'<(?!a\s|/a>|strong>|/strong>|em>|/em>|code>|/code>|/p>|p>|h[1-6]>|/h[1-6]>|pre>|/pre>)', '&lt;', s)
         html.append('<p>'+s+'</p>')
     flush()
     return title,'\n'.join(html)
