@@ -135,7 +135,15 @@ def md_to_html(md):
         # WP 短代码(如 [postsbox]) 原样保留, 不包 <p>, 避免古腾堡解析异常
         if re.match(r'^\[[a-z]+', s):
             html.append(s); continue
-        html.append('<p>'+s.replace('&','&amp;').replace('<','&lt;')+'</p>')
+        # 行内 Markdown -> HTML: **加粗** -> <strong>, *斜体* -> <em>
+        # 注意: 必须在 &lt; 转义之前做, 否则 <strong> 会被转义成 &lt;strong> 导致加粗失效
+        s = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', s)
+        s = re.sub(r'(?<!\*)\*(?!\*)(.+?)\*(?!\*)', r'<em>\1</em>', s)
+        # 转义用户文本里的裸 < & (已生成的标签不受影响, 因 <strong>/<em> 非裸)
+        s = s.replace('&','&amp;')
+        # 仅转义不在已知标签内的 <
+        s = re.sub(r'<(?!strong>|/strong>|em>|/em>|/p>|p>|h[1-6]>|/h[1-6]>|pre>|/pre>|code>|/code>)', '&lt;', s)
+        html.append('<p>'+s+'</p>')
     flush()
     return title,'\n'.join(html)
 
@@ -145,7 +153,9 @@ def main():
     md_path=sys.argv[1]
     rebuild='--rebuild' in sys.argv
     dry_run='--dry-run' in sys.argv
-    fmt='html' if '--format' in sys.argv and 'html' in sys.argv else 'md'  # 默认 md
+    fmt='html' if ('--format' in sys.argv and 'html' in sys.argv) else 'md'  # 默认 md
+    # 注: 用户后台未装 Markdown 渲染插件时, --format md 会导致 **加粗** 显示成原样星号。
+    #     若需后台直接加粗生效, 用 --format html (已内置 ** -> <strong> 转换, 不依赖插件)。
     if not os.path.exists(md_path): print("文件不存在:",md_path); sys.exit(1)
     user=os.environ.get('WP_USER'); pw=os.environ.get('WP_APP_PASS')
     site=os.environ.get('WP_SITE','https://appstoy.com').rstrip('/')
