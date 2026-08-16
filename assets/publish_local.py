@@ -41,10 +41,11 @@ def md_to_html(md):
             continue
         if in_code: code.append(ln); continue
         if not s: continue
-        if re.match(r'^(0x[0-9A-Fa-f]+|\d+(\.\d+)*)\b',s): html.append('<h3>'+s+'</h3>'); continue
+        if re.match(r'^0x[0-9A-Fa-f]+(\s|$)', s): html.append('<h3>'+s+'</h3>'); continue
         if s.startswith('#'):
             lvl=min(len(s.split(' ')[0]),6); html.append(f'<h{lvl}>'+s.lstrip('#').strip()+'</h{lvl}>'); continue
-        if s.startswith('[postsbox'): html.append('<p>'+s+'</p>'); continue
+        if re.match(r'^\[[a-z]+', s):
+            html.append(s); continue
         html.append('<p>'+s.replace('&','&amp;').replace('<','&lt;')+'</p>')
     flush()
     return title,'\n'.join(html)

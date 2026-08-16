@@ -117,10 +117,15 @@ def md_to_html(md):
             continue
         if in_code: code.append(ln); continue
         if not s: continue
-        if re.match(r'^(0x[0-9A-Fa-f]+|\d+(\.\d+)*)\b',s): html.append('<h3>'+s+'</h3>'); continue
+        # 0xN 小标题: 必须严格以 0x 开头 (修复把"8月"误判为标题的bug)
+        if re.match(r'^0x[0-9A-Fa-f]+(\s|$)', s):
+            html.append('<h3>'+s+'</h3>'); continue
+        # Markdown 标准标题 # ## ###
         if s.startswith('#'):
             lvl=min(len(s.split(' ')[0]),6); html.append(f'<h{lvl}>'+s.lstrip('#').strip()+'</h{lvl}>'); continue
-        if s.startswith('[postsbox'): html.append('<p>'+s+'</p>'); continue
+        # WP 短代码(如 [postsbox]) 原样保留, 不包 <p>, 避免古腾堡解析异常
+        if re.match(r'^\[[a-z]+', s):
+            html.append(s); continue
         html.append('<p>'+s.replace('&','&amp;').replace('<','&lt;')+'</p>')
     flush()
     return title,'\n'.join(html)
