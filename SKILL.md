@@ -49,14 +49,14 @@ description: 博客写作全流程助手——从抓取站点文章、迭代提�
    - **数据标来源且附链接**（R49）：`(来源：[《标题》](url)，2026-08 核验)`；无法核实标"以官方为准"
    - **承上启下过渡**（R50）、**实操步骤可验证不造假**（R51）
    - **草稿未发表提醒**（R）：每篇新草稿头部加 `<!-- 【未发表草稿】... -->` 注释，避免误以为已发
-4. 定稿后跑质检：`python3 <SKILL_DIR>/assets/review_before_publish.py <草稿md>`，据 ⚠ 微调，重跑至达标。
+4. 写稿阶段**不跑质检、不转格式**：直接写 Markdown 原文草稿即可。三维质检与格式转换只在用户明确授权"上传/传到后台"时执行（见阶段 C）。
 
-### 阶段 C：上传草稿（发布前最后一步）
-1. 确认已跑过阶段 B 的质检。
-2. **WP 后端**（默认）：
+### 阶段 C：上传草稿（仅当用户明确授权"上传/传到后台"才执行）
+1. 先跑三维质检：`python3 <SKILL_DIR>/assets/review_before_publish.py <草稿md>`，据 ⚠ 微调（清单型"免费"主题词密度偏高属正常）。
+2. **WP 后端**（默认，Markdown 格式）：
    - 设环境变量（凭据**只从环境变量读，绝不写文件/记忆**）：
      `export WP_USER=<用户> WP_APP_PASS='<应用密码>' WP_SITE='<站>'`
-   - 上传：`python3 <SKILL_DIR>/assets/publish_draft.py <草稿md>`
+   - 上传：`python3 <SKILL_DIR>/assets/publish_draft.py <草稿md>`（默认 `--format md` 存 Markdown 原文，避免 Gutenberg 区块错位；需后台装 WP Githuber MD 渲染）
    - 脚本自动 AI 分析分类/标签并填入，仅建 `draft` 不发布。
 3. **本地/静态站后端**（可扩展）：
    - `python3 <SKILL_DIR>/assets/publish_local.py <草稿md> [--format hexo]`
