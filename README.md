@@ -133,5 +133,15 @@ hermes-blog-writer/
   - 代码块 `<pre><code>`、标准 `#`/`##` 标题正常转换
 - **来源标注**：写作规范要求数据/评价**附可点击链接** `(来源：[《标题》](url)，日期 核验)`，便于读者核对。
 
+## 关于上传格式（Markdown vs HTML）
+
+- 默认 **`--format md`**：直接把 Markdown 原文存进 `post_content`，Gutenberg 编辑器里是原生 Markdown 区块，**不会区块错位**。
+  - ⚠️ WordPress 原生不渲染 Markdown。需在后台装 **Markdown 渲染插件**（推荐 **WP Githuber MD**，免费，自带古腾堡 Markdown 区块并自动渲染）才能前台正常排版。
+  - 不装插件则前台会显示 `#`/`**` 原文，但**不破坏区块结构**。
+- `--format html`：旧行为，把 MD 转 HTML 上传（Gutenberg 可能区块错位，不推荐）。
+- **`--dry-run`**（建议先跑）：只做 AI 分类/标签分析 + 内容预览，**不真正上传**，确认后再去掉该参数执行。
+
+安全铁律：任何写/删 WP 操作必须先经用户明确授权；脚本仅建 `draft`，绝不 `publish`。
+
 ## License
 MIT

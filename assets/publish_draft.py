@@ -2,13 +2,16 @@
 # -*- coding: utf-8 -*-
 """
 Appstoy 草稿上传器（含 AI 分析分类/标签）
-功能: 本地 MD 草稿 -> 转 HTML -> AI 分析选分类/标签 -> 以 draft 推到 WP 后台。
+功能: 本地 MD 草稿 -> (可选转HTML) -> AI 分析选分类/标签 -> 以 draft 推到 WP 后台。
 
 用法:
   export WP_USER=ricky
   export WP_APP_PASS='s8OT fF8A XrVj m55g Lz28 MQTD'   # 带空格也可，自动去
   export WP_SITE='https://appstoy.com'
-  python3 publish_draft.py <草稿md> [--rebuild]   # --rebuild: 先抓全部分类/标签做匹配
+  python3 publish_draft.py <草稿md> [--rebuild] [--dry-run] [--format md|html]
+    # --dry-run: 只做AI分析+内容预览, 不真正上传(建议先dry-run确认)
+    # --format md (默认): 存Markdown原文, 需装WP Markdown插件(如 WP Githuber MD)
+    # --format html (旧): 转HTML上传, Gutenberg可能区块错位
 
 前置:
   - 上传前应先跑 review_before_publish.py 过质检闸门。
@@ -16,6 +19,12 @@ Appstoy 草稿上传器（含 AI 分析分类/标签）
 安全:
   - 仅创建 status=draft，绝不 publish。
   - 带浏览器 UA 绕过 Cloudflare 对 POST 的 403 拦截。
+  - 任何写/删操作必须先经用户明确授权；本脚本只建 draft 不发布。
+
+关于 Markdown 上传:
+  WordPress 原生不渲染 Markdown。--format md 需后台装 Markdown 插件
+  (推荐 WP Githuber MD, 免费, 自带古腾堡 Markdown 区块)。不装则前台
+  显示 #/** 原文但不破坏区块结构。
 
 AI 分析策略(轻量、确定性、可复现):
   用「标题+正文关键词」匹配 WP 已有分类/标签 ID(缓存到 ./_wp_terms.json)。
@@ -132,8 +141,11 @@ def md_to_html(md):
 
 def main():
     if len(sys.argv)<2:
-        print("用法: python3 publish_draft.py <草稿md> [--rebuild]"); sys.exit(1)
-    md_path=sys.argv[1]; rebuild='--rebuild' in sys.argv
+        print("用法: python3 publish_draft.py <草稿md> [--rebuild] [--dry-run] [--format md|html]"); sys.exit(1)
+    md_path=sys.argv[1]
+    rebuild='--rebuild' in sys.argv
+    dry_run='--dry-run' in sys.argv
+    fmt='html' if '--format' in sys.argv and 'html' in sys.argv else 'md'  # 默认 md
     if not os.path.exists(md_path): print("文件不存在:",md_path); sys.exit(1)
     user=os.environ.get('WP_USER'); pw=os.environ.get('WP_APP_PASS')
     site=os.environ.get('WP_SITE','https://appstoy.com').rstrip('/')
@@ -143,11 +155,27 @@ def main():
     terms=get_terms(site,auth)
     if rebuild and os.path.exists(CACHE): os.remove(CACHE); terms=get_terms(site,auth)
     raw=open(md_path,encoding='utf-8').read()
-    title,content=md_to_html(raw)
+    # 剥掉头部 <!-- 未发表提醒 --> 注释, 不进 WP
+    body=re.sub(r'^<!--.*?-->\s*', '', raw, flags=re.S|re.M)
+    # 标题取第一行 # 
+    mtitle=re.search(r'^#\s+(.+)$', body, flags=re.M)
+    title=mtitle.group(1).strip() if mtitle else body.strip().split('\n')[0][:40]
+    if fmt=='md':
+        # Markdown 原文直传 (需 WP 装 Markdown 渲染插件)
+        content=body.strip()
+    else:
+        title,content=md_to_html(raw)
     cats,tags=analyze(raw)
     cat_names=[terms['cats'].get(str(c),terms['cats'].get(c,'?')) for c in cats]
     tag_names=[terms['tags'].get(str(t),terms['tags'].get(t,'?')) for t in tags]
     print(f"AI分析 -> 分类: {cat_names} | 标签: {tag_names}")
+    print(f"格式: {'Markdown原文' if fmt=='md' else 'HTML转码'} | 标题: {title}")
+    print(f"正文长度: {len(content)} 字符")
+    if dry_run:
+        print("\n⏸  --dry-run: 未真正上传。确认无误后去掉 --dry-run 再执行。")
+        print("---- 内容预览(前400字) ----")
+        print(content[:400])
+        return
     payload={"title":title,"content":content,"status":"draft","categories":cats,"tags":tags}
     req=urllib.request.Request(f"{site}/wp-json/wp/v2/posts",data=json.dumps(payload).encode(),
         headers={"Authorization":"Basic "+auth,"Content-Type":"application/json","User-Agent":UA},method="POST")
